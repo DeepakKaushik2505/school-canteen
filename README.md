@@ -59,7 +59,7 @@ Run these files in order:
 npm run dev
 ```
 
-Open: [http://localhost:3000](http://localhost:3000)
+Open: [https://school-canteen-mocha.vercel.app/](https://school-canteen-mocha.vercel.app/)
 
 ## 📚 Libraries Used
 
