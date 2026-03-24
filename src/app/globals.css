@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .gradient-header {
+    @apply bg-gradient-to-br from-black-forest to-olive-leaf;
+  }
+
+  .gradient-card {
+    @apply bg-gradient-to-b from-cornsilk to-[#f5f0d8];
+  }
+
+  .gradient-button {
+    @apply bg-gradient-to-br from-olive-leaf to-black-forest hover:from-olive-leaf/90 hover:to-black-forest/90;
+  }
+
+  .gradient-page {
+    @apply bg-gradient-to-b from-cornsilk via-light-caramel/30 to-cornsilk;
+  }
+}
