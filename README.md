@@ -9,6 +9,8 @@ A modern canteen ordering prototype built with **Next.js App Router**, **TypeScr
 - 🔐 Authentication with Clerk + Google OAuth
 - 👤 Navbar auth states: Login button (signed out), avatar dropdown (signed in)
 - 🎓 Create Student form with Name, Class, Section, Roll No., and referral code
+- ✅ Form handling and validation using **React Hook Form + Zod**
+- 🧠 Shared UI state using **Zustand** store (students detail modal state)
 - 📋 Students page with a table of 20 dummy students and popup detail modal
 - 🧪 Fallback/mock-first behavior for demos when backend is unavailable
 
@@ -67,6 +69,10 @@ Open: [http://localhost:3000](http://localhost:3000)
 - `react`, `react-dom`
 - `@supabase/supabase-js`
 - `@clerk/nextjs`
+- `react-hook-form`
+- `zod`
+- `@hookform/resolvers`
+- `zustand`
 
 ### Development
 
@@ -93,7 +99,8 @@ This lets the app remain usable for UI testing and presentations even without a 
 - `src/app/page.tsx` - landing page
 - `src/app/snacks/page.tsx` - snacks UI and ordering
 - `src/app/students/page.tsx` - students table + popup details
-- `src/app/students/create/page.tsx` - create student form
+- `src/app/students/create/page.tsx` - create student form (RHF + Zod)
+- `src/lib/store/app-store.ts` - Zustand global store
 - `src/lib/db.ts` - Supabase query layer
 - `src/lib/types.ts` - shared interfaces
 - `src/lib/snacks-config.ts` - snacks config + fallback
@@ -105,66 +112,3 @@ This lets the app remain usable for UI testing and presentations even without a 
 - Site icon/logo: `public/assets/logo.jpg`
 - Hero assets: `public/assets/home-pic.webp`, `public/assets/home-canteen.avif`
 - Current setup is prototype-oriented; tighten RLS/auth rules for production use.
-# School Canteen
-
-A small canteen ordering prototype app built with Next.js (App Router), TypeScript, and TailwindCSS.
-
-## Features
-
-- **Auth** – Clerk + Google OAuth. Login required for ordering and student management.
-- **Snacks Page** – Browse snacks; order (logged-in students only, no manual student selection)
-- **Students Page** – List of students with name, referral code, total spent
-- **Student Detail Page** – Student info, order history; place order only for own record
-- **Create Student** – Form with name and auto-generated referral code; links to Clerk user
-
-## Theme Colors
-
-- **Olive Leaf** `#606c38`
-- **Black Forest** `#283618`
-- **Cornsilk** `#fefae0`
-- **Light Caramel** `#dda15e`
-
-## Getting Started
-
-1. **Supabase setup**
-
-   - Create a project at [supabase.com](https://supabase.com)
-   - Run `supabase/schema.sql` in the SQL Editor
-   - Run `supabase/seed.sql` for initial snacks and students
-   - If `students.userId` was created as uuid, run `supabase/migration_userid_text.sql`
-
-2. **Clerk setup**
-
-   - Create an application at [clerk.com](https://clerk.com)
-   - Enable Google OAuth (User & Authentication → Social Connections)
-   - Add `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` to `.env.local`
-
-3. **Run the app**
-
-```bash
-npm install
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── page.tsx           # Home
-│   ├── snacks/page.tsx    # Snacks list + order modal
-│   └── students/
-│       ├── page.tsx       # Students list
-│       ├── create/page.tsx
-│       └── [id]/page.tsx  # Student detail + orders
-├── components/
-│   ├── Nav.tsx
-│   ├── OrderModal.tsx     # Order from Snacks page
-│   └── OrderSnackModal.tsx # Order from Student detail
-└── lib/
-    ├── types.ts
-    ├── supabase.ts        # Supabase client
-    └── db.ts              # Supabase queries
-```

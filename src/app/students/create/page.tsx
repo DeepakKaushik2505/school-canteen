@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createStudent } from "@/lib/db";
 
 function generateReferralCode(name: string): string {
@@ -12,45 +15,64 @@ function generateReferralCode(name: string): string {
   return `${prefix}-${random}-2024`;
 }
 
+const createStudentSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters"),
+  classVal: z.string().trim().regex(/^\d{1,2}$/, "Class must be a 1 or 2 digit number").optional(),
+  section: z
+    .string()
+    .trim()
+    .max(2, "Section should be an uppercase letter (e.g. A, B)")
+    .optional(),
+  rollNo: z
+    .string()
+    .trim()
+    .regex(/^\d*$/, "Roll No. should contain only numbers")
+    .optional(),
+});
+
+type CreateStudentFormValues = z.infer<typeof createStudentSchema>;
+
 export default function CreateStudentPage() {
   const router = useRouter();
   const { user } = useUser();
-  const [name, setName] = useState("");
-  const [classVal, setClassVal] = useState("");
-  const [section, setSection] = useState("");
-  const [rollNo, setRollNo] = useState("");
-  const [referralCode, setReferralCode] = useState("");
-  const [error, setError] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setName(value);
-    if (value.trim()) {
-      setReferralCode(generateReferralCode(value));
-    } else {
-      setReferralCode("");
-    }
-  };
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<CreateStudentFormValues>({
+    resolver: zodResolver(createStudentSchema),
+    defaultValues: {
+      name: "",
+      classVal: "",
+      section: "",
+      rollNo: "",
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = name.trim();
-    if (!trimmed) {
-      setError("Please enter a name.");
-      return;
-    }
+  const name = watch("name");
+  const referralCode = useMemo(
+    () => (name?.trim() ? generateReferralCode(name) : ""),
+    [name]
+  );
+
+  const onSubmit = async (values: CreateStudentFormValues) => {
     try {
       setSubmitting(true);
-      setError("");
-      const student = await createStudent(trimmed, user?.id ?? null, {
-        class: classVal.trim() || null,
-        section: section.trim() || null,
-        rollNo: rollNo.trim() || null,
+      setSubmitError("");
+      const student = await createStudent(values.name.trim(), user?.id ?? null, {
+        class: values.classVal?.trim() || null,
+        section: values.section?.trim() || null,
+        rollNo: values.rollNo?.trim() || null,
       });
       router.push(`/students/${student.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create student");
+      setSubmitError(
+        err instanceof Error ? err.message : "Failed to create student"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -66,7 +88,7 @@ export default function CreateStudentPage() {
       </h1>
 
       <div className="gradient-card rounded-xl p-6 border border-light-caramel/30 shadow-md w-full max-w-md">
-        <form onSubmit={handleSubmit} className="flex flex-col items-center">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center">
           <div className="w-full mb-4">
             <label htmlFor="name" className="block text-sm font-medium text-black-forest mb-2 text-center">
               Name
@@ -74,12 +96,15 @@ export default function CreateStudentPage() {
             <input
               id="name"
               type="text"
-              value={name}
-              onChange={handleNameChange}
               placeholder="Enter student name"
               className={inputClass}
-              required
+              {...register("name")}
             />
+            {errors.name && (
+              <p className="text-red-600 text-xs mt-1 text-center">
+                {errors.name.message}
+              </p>
+            )}
           </div>
 
           <div className="w-full mb-4">
@@ -89,10 +114,9 @@ export default function CreateStudentPage() {
             <input
               id="class"
               type="text"
-              value={classVal}
-              onChange={(e) => setClassVal(e.target.value)}
               placeholder="e.g. 10"
               className={inputClass}
+              {...register("classVal")}
             />
           </div>
 
@@ -103,11 +127,15 @@ export default function CreateStudentPage() {
             <input
               id="section"
               type="text"
-              value={section}
-              onChange={(e) => setSection(e.target.value)}
               placeholder="e.g. A"
               className={inputClass}
+              {...register("section")}
             />
+            {errors.section && (
+              <p className="text-red-600 text-xs mt-1 text-center">
+                {errors.section.message}
+              </p>
+            )}
           </div>
 
           <div className="w-full mb-4">
@@ -117,11 +145,15 @@ export default function CreateStudentPage() {
             <input
               id="rollNo"
               type="text"
-              value={rollNo}
-              onChange={(e) => setRollNo(e.target.value)}
               placeholder="e.g. 15"
               className={inputClass}
+              {...register("rollNo")}
             />
+            {errors.rollNo && (
+              <p className="text-red-600 text-xs mt-1 text-center">
+                {errors.rollNo.message}
+              </p>
+            )}
           </div>
 
           <div className="w-full mb-6">
@@ -133,8 +165,8 @@ export default function CreateStudentPage() {
             </div>
           </div>
 
-          {error && (
-            <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
+          {submitError && (
+            <p className="text-red-600 text-sm mb-4 text-center">{submitError}</p>
           )}
 
           <div className="flex gap-3 w-full">

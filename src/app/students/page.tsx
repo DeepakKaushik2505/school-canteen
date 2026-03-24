@@ -1,17 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import { StudentDetailModal } from "@/components/StudentDetailModal";
 import { DUMMY_STUDENTS, getDummyOrdersForStudent } from "@/lib/dummy-students";
-import type { Student, Order } from "@/lib/types";
+import { useAppStore } from "@/lib/store/app-store";
 
 export default function StudentsPage() {
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [selectedOrders, setSelectedOrders] = useState<Order[]>([]);
+  const {
+    selectedStudent,
+    selectedOrders,
+    isStudentModalOpen,
+    openStudentModal,
+    closeStudentModal,
+  } = useAppStore();
 
-  const handleViewDetails = (student: Student) => {
-    setSelectedStudent(student);
-    setSelectedOrders(getDummyOrdersForStudent(student.id));
+  const handleViewDetails = (student: (typeof DUMMY_STUDENTS)[number]) => {
+    openStudentModal(student, getDummyOrdersForStudent(student.id));
   };
 
   return (
@@ -57,11 +60,11 @@ export default function StudentsPage() {
         </div>
       </div>
 
-      {selectedStudent && (
+      {isStudentModalOpen && selectedStudent && (
         <StudentDetailModal
           student={selectedStudent}
           orders={selectedOrders}
-          onClose={() => setSelectedStudent(null)}
+          onClose={closeStudentModal}
         />
       )}
     </div>

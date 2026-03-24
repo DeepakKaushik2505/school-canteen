@@ -110,6 +110,12 @@ This file records the prompts/instructions provided by the user during this sess
    - student info
    - orders list (snack name, quantity, payable amount)
 
+## 11) State Management + Form Validation
+
+47. Add **React Hook Form + Zod** to the Create Student form.
+48. Add a small global store with **Zustand** for shared app state.
+49. Add these changes to documentation files (`README.md` and `PROMPTS_USED.md`).
+
 ---
 
 ## AI Tooling Used
